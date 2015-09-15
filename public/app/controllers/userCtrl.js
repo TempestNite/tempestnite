@@ -48,19 +48,35 @@ angular.module('userCtrl', ['userService'])
 	// differentiates between create or edit pages
 	vm.type = 'create';
 
+	vm.passcheck = '';
+
+	vm.checkPassword = function()
+	{
+		if (vm.userData.password == vm.passcheck)
+			return true;
+
+		else return false;
+	}
+
 	// function to create a user
 	vm.saveUser = function() {
 		vm.processing = true;
 		vm.message = '';
 
-		// use the create function in the userService
-		User.create(vm.userData)
-			.success(function(data) {
-				vm.processing = false;
-				vm.userData = {};
-				vm.message = data.message;
-			});
-			
+		vm.error = 'Passwords do not match';
+
+		if (vm.checkPassword() == true)
+		{
+			// use the create function in the userService
+			User.create(vm.userData)
+				.success(function(data) {
+					vm.processing = false;
+					vm.userData = {};
+					vm.message = data.message;
+				});
+		}
+
+		else vm.processing = false;
 	};	
 
 })

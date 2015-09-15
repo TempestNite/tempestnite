@@ -1,14 +1,104 @@
 var bodyParser = require('body-parser'); 	// get body-parser
 var User       = require('../models/user');
+var Post 	   = require('../models/post');
 var jwt        = require('jsonwebtoken');
-var config     = require('../../config');
+var config     = require('../../config/db');
 
 // super secret for creating tokens
 var superSecret = config.secret;
 
-module.exports = function(app, express) {
+
+module.exports = function(app, express, passport) 
+{
 
 	var apiRouter = express.Router();
+
+	apiRouter.route('/posts')
+		// create a post (accessed at POST http://tempestnite.com/api)
+		.post(function(req, res)
+		{
+			// create a new instance of the User model
+			var post = new Post();
+
+			//set the posts information (come from request)
+			post.title = req.body.title;
+			post.pg = req.body.pg;
+			post.created_at = req.body.created_at;
+			post.updated_at = req.body.updated_at;
+
+			// save the post and check for errors
+			post.save(function(err) 
+			{
+				if (err)
+				{
+					// duplicate entry
+					if (err.code == 11000)
+						return res.json({ success: false, message: 'A post\
+							with that id already exists'});
+					else
+						return res.send(err);
+				}
+
+				res.json({ message: 'Post created!' });
+			});
+		})
+
+		// get all the posts
+		.get(function(req, res)
+		{
+			Post.find(function(err, posts)
+			{
+				if (err) res.send(err);
+
+				// return the posts
+				res.json(posts);
+			});
+		});
+
+		apiRouter.route('posts/:post_id')
+
+			// get the post w/ id
+			.get(function(req, res)
+			{
+				Post.findById(req.params.post_id, function(err, post)
+				{
+					if (err) res.send(err);
+
+					res.json(post);
+				});
+			})
+
+			.put(function(req, res)
+			{
+				Post.findById(req.params.post_id, function(err, post)
+				{
+					if (err) res.send(err);
+
+					// update the posts info only if new
+					// save the user
+					post.save(function(err)
+					{
+						if (err) res.send(err);
+
+						res.json({ message: 'Post updated!' });
+					});
+				});
+			})
+
+			.delete(function(req, res)
+			{
+				Post.remove(
+				{
+					_id: req.params.post_id
+				}, 
+
+				function(err, post)
+				{
+					if (err) return res.send(err);
+
+					res.json({ message: 'Successfully deleted.' });
+				});
+			});
 
 	// route to generate sample user
 	apiRouter.post('/sample', function(req, res) {
@@ -37,8 +127,88 @@ module.exports = function(app, express) {
 
 	});
 
+	// ====================================
+	// G-RECAPTCHA-------------------------
+	// ====================================
+	var https = require('https');
+
+	function verifyRecaptcha(key, callback)
+	{
+		https.get('https://www.google.com/recaptcha/api/siteverify' + 
+			db.secret + '&response' + key, function(res)
+			{
+				var data = '';
+				res.on('data', function(chunk)
+				{
+					data+=chunk.toString();
+				});
+
+				res.on('end', function()
+				{
+					try {
+						var parsedData = JSON.parse(data);
+						callback(parsedData.success);
+					} catch (e) {
+						callback(false);
+					}
+				});
+			});
+	}
+
+	apiRouter.route('/register')
+
+		// create a user (accessed at POST http://localhost:8080/users)
+		.post(function(req, res) {
+			
+			var user = new User();		// create a new instance of the User model
+			user.name = req.body.name;  // set the users name (comes from the request)
+			user.username = req.body.username;  // set the users username (comes from the request)
+			user.password = req.body.password;  // set the users password (comes from the request)
+			user.email = req.body.email;
+
+			verifyRecaptcha(req,body['g-recaptcha-response'], function(success)
+			{
+				if (success)
+				{
+					res.end("Success!");
+					user.save(function(err) {
+						if (err) {
+							// duplicate entry
+							if (err.code == 11000) 
+								return res.json({ success: false, 
+									message: 'A user with that username already exists. '});
+							else 
+								return res.send(err);
+						}
+
+						// return a message
+						res.json({ message: 'User created!' });
+					});
+				}
+
+				else
+				{
+					res.end('Captcha failed, sorry.');
+				}
+
+			});
+
+		})
+
+		// get all the users (accessed at GET http://localhost:8080/api/users)
+		.get(function(req, res) {
+
+			User.find({}, function(err, users) {
+				if (err) res.send(err);
+
+				// return the users
+				res.json(users);
+			});
+		});
+
 	// route to authenticate a user (POST http://localhost:8080/api/authenticate)
-	apiRouter.post('/authenticate', function(req, res) {
+	apiRouter.post('/authenticate', function(req, res) 
+	{
 
 	  // find the user
 	  User.findOne({
@@ -219,6 +389,16 @@ module.exports = function(app, express) {
 	// api endpoint to get user information
 	apiRouter.get('/me', function(req, res) {
 		res.send(req.decoded);
+	});
+
+	apiRouter.get('/register', function(req, res)
+	{
+		res.json({ message: 'Successfully created user!' });
+	});
+
+	apiRouter.get('*', function(req, res)
+	{
+		res.sendFile(path.join(__dirname + '/public/views/index.html'));
 	});
 
 	return apiRouter;

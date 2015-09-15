@@ -31,6 +31,13 @@ angular.module('app.routes', ['ngRoute'])
 			controllerAs: 'user'
 		})
 
+		.when('/register',
+		{
+			templateUrl: 'app/views/pages/register.html',
+			controller: 'userCreateController',
+			controllerAs: 'user'
+		})
+
 		// page to edit a user
 		.when('/users/:user_id', {
 			templateUrl: 'app/views/pages/users/single.html',
@@ -42,6 +49,27 @@ angular.module('app.routes', ['ngRoute'])
 			templateUrl: 'app/views/pages/stream.html',
 			controller: 'mainController',
 			controllerAs: 'stream'
+		})
+
+		.when('/posts', {
+			templateUrl: 'app/views/pages/users/posts.html',
+			controller: 'postController',
+			controllerAs: 'post'
+		})
+
+		// form to create a new user
+		// same view as edit page
+		.when('/posts/create', {
+			templateUrl: 'app/views/pages/posts/single-post.html',
+			controller: 'postCreateController',
+			controllerAs: 'post'
+		})
+
+		// page to edit a user
+		.when('/posts/:post_id', {
+			templateUrl: 'app/views/pages/posts/single-post.html',
+			controller: 'postEditController',
+			controllerAs: 'post'
 		});
 
 	$locationProvider.html5Mode(true);

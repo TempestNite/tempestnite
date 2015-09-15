@@ -1,0 +1,41 @@
+<div class="page-header">
+	<h1>
+		Posts 
+		<a href="/posts/create" class="btn btn-default">
+			<span class="glyphicon glyphicon-plus"></span> 
+			New Post
+		</a>
+	</h1>
+
+</div>
+
+<div class="jumbotron text-center" ng-show="post.processing">
+	<span class="glyphicon glyphicon-repeat spinner"></span>
+	<p>Loading Posts...</p>
+</div>
+
+<table class="table table-bordered table-striped" ng-show="post.posts">
+	<thead>
+		<tr>
+			<th>_id</th>
+			<th>Title</th>
+			<th>Paragraph</th>
+			<th>Created At</th>
+			<th>Updated At</th>
+			<th class="col-sm-2"></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="entry in post.posts">
+			<td>{{ entry._id }}</td>
+			<td>{{ entry.title }}</td>
+			<td>{{ entry.pg }}</td>
+			<td>{{ entry.created_at }}</td>
+			<td>{{ entry.updated_at }}</td>
+			<td class="col-sm-2">
+				<a ng-href="/posts/{{ entry._id }}" class="btn btn-danger">Edit</a>
+				<a href="#" ng-click="post.deletePost(entry._id)" class="btn btn-primary">Delete</a>
+			</td>
+		</tr>
+	</tbody>
+</table>

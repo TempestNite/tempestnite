@@ -9,8 +9,15 @@ header .navbar
 { 
 	border-radius:0;
 	padding-right: 20px;
-	background-color:#283593; /*#ff3d00;*/
+	background-color: #283593; /* #ff3d00;*/
+	width: 100%;
 }
+
+a.navbar-brand:hover
+{
+	color:indigo;
+}
+
 
 #jumbotxt
 {
@@ -23,6 +30,7 @@ header .navbar
 	background: rgba(0, 0, 0, 0.7);
 }
 
+
 .jumboto
 {
 	max-width: 100%;
@@ -30,6 +38,11 @@ header .navbar
 	position: relative;
 	margin-top: -71px;
 	margin-bottom: -50px;
+}
+
+.g-recaptcha
+{
+	padding-top: 20px;
 }
 
 md-card
@@ -40,17 +53,18 @@ md-card
 iframe
 {
 	margin-top: -20px;
+	/* max-width: 100%; */
 }
 
 a
 {
-	color: #3f51b5;
+	color: black;
 	font-family: Roboto;
 }
 
 a:link
 {
-	color: #3f51b5 ;
+	color: black ;
 }
 
 #loginex
